@@ -1,12 +1,24 @@
-import { useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, role }) => {
   const { auth } = useContext(AuthContext);
+  const location = useLocation();
 
-  if (!auth.isAuth) return <Navigate to="/" />;
-  if (role && auth.role !== role) return <Navigate to="/" />;
+  useEffect(() => {
+    if (!auth.isAuth) {
+      alert("Please login first");
+    }
+  }, [auth.isAuth]);
+
+  if (!auth.isAuth) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (role && auth.role !== role) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 };

@@ -1,20 +1,29 @@
 import { useEffect, useState } from "react";
-import { getData } from "../utils/localStorage";
 import RestaurantCard from "../components/RestaurantCard";
+import { getRestaurants } from "../utils/localStorage";
 
 const CustomerDashboard = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    setData(getData());
+    const restaurants = getRestaurants();
+    setData(restaurants);
   }, []);
 
   return (
     <div>
       <h2>Customer Dashboard</h2>
-      {data.map((el) => (
-        <RestaurantCard key={el.restaurantID} {...el} />
-      ))}
+
+      {data.length === 0 ? (
+        <p>No restaurants available</p>
+      ) : (
+        data.map((restaurant) => (
+          <RestaurantCard
+            key={restaurant.restaurantID}
+            {...restaurant}
+          />
+        ))
+      )}
     </div>
   );
 };

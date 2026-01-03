@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -9,29 +9,41 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
+    // ADMIN
     if (email === "admin@gmail.com" && password === "admin1234") {
       login("admin");
       navigate("/admin/dashboard");
-    } else if (
-      email === "customer@gmail.com" &&
-      password === "customer1234"
-    ) {
+      return;
+    }
+
+    // CUSTOMER
+    if (email === "customer@gmail.com" && password === "customer1234") {
       login("customer");
       navigate("/customers/dashboard");
-    } else {
-      alert("Invalid Credentials");
+      return;
     }
+
+    alert("Invalid email or password");
   };
 
   return (
     <div>
       <h2>Login</h2>
-      <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+
       <input
-        placeholder="Password"
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
         type="password"
+        placeholder="Password"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+
       <button onClick={handleLogin}>Login</button>
     </div>
   );

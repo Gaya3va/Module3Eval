@@ -1,58 +1,68 @@
+
 import { useEffect, useState } from "react";
-import { getData, setData } from "../utils/localStorage";
+import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
 import RestaurantCard from "../components/RestaurantCard";
-import Navbar from "../components/Navbar";
+import { getRestaurants, saveRestaurants } from "../utils/localStorage";
 
 const AdminDashboard = () => {
-  const [data, setDataState] = useState([]);
-  const [name, setName] = useState("");
-  const [search, setSearch] = useState("");
+  const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    setDataState(getData());
-  }, []);
-
-  const addRestaurant = () => {
-    if (!name) return alert("Empty form not allowed");
-
-    const newRes = {
-      restaurantID: Date.now(),
-      restaurantName: name,
-      address: "Jaipur",
-      type: "Rajasthani",
-      parkingLot: true,
-      image:
-        "https://coding-platform.s3.amazonaws.com/dev/lms/tickets/7524dfde-46fa-4506-8766-eca8da47c2f1/2izhqnTaNLdenHYF.jpeg"
-    };
-
-    const updated = [...data, newRes];
-    setData(updated);
-    setDataState(updated);
-    alert("Restaurant added");
-    setName("");
+  // Load data from localStorage
+  const refresh = () => {
+    const restaurants = getRestaurants();
+    setData(restaurants);
   };
 
-  const filtered = data.filter(
-    (el) =>
-      el.restaurantName.toLowerCase().includes(search.toLowerCase()) ||
-      el.address.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  // DELETE restaurant
+  const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete?")) return;
+
+    const updated = data.filter(
+      (item) => item.restaurantID !== id
+    );
+
+    saveRestaurants(updated);
+    setData(updated);
+    alert("Restaurant deleted successfully");
+  };
+
+  // UPDATE restaurant (navigate)
+  const handleUpdate = (restaurant) => {
+    navigate("/admin/restaurants/update", {
+      state: restaurant
+    });
+  };
 
   return (
-    <div>
-      <h2>Admin Dashboard</h2>
-      <Navbar search={search} setSearch={setSearch} />
+    <div style={{ display: "flex" }}>
+      
+      {/* ADMIN SIDEBAR (ADD FORM) */}
+      <AdminSidebar refresh={refresh} />
 
-      <input
-        placeholder="Restaurant Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={addRestaurant}>Add</button>
+      {/* MAIN CONTENT */}
+      <div style={{ marginLeft: "20px", width: "100%" }}>
+        <h2>Admin Dashboard</h2>
 
-      {filtered.map((el) => (
-        <RestaurantCard key={el.restaurantID} {...el} isAdmin />
-      ))}
+        {data.length === 0 ? (
+          <p>No restaurants added yet</p>
+        ) : (
+          data.map((restaurant) => (
+            <RestaurantCard
+              key={restaurant.restaurantID}
+              {...restaurant}
+              isAdmin={true}
+              onUpdate={() => handleUpdate(restaurant)}
+              onDelete={handleDelete}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 };
